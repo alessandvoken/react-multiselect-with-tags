@@ -1,0 +1,84 @@
+/* Demo page styles. Not part of the copyable component. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6f7f9;
+  color: #1f2933;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+p {
+  margin: 0;
+}
+
+.demo {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.demo > header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.demo > header p {
+  color: #4a5562;
+}
+
+.demo-card,
+.demo-result {
+  padding: 1.5rem;
+  border: 1px solid #d9dde3;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.demo-result {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.demo-result h2 {
+  margin-bottom: 0.5rem;
+}
+
+.demo-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+@media (max-width: 30rem) {
+  .demo {
+    padding-block: 1.5rem;
+  }
+
+  .demo-card,
+  .demo-result {
+    padding: 1rem;
+  }
+}
