@@ -51,8 +51,65 @@
   cursor: default;
 }
 
+:where(.multiselect-checkbox) {
+  display: inline-block;
+  box-sizing: border-box;
+  inline-size: 16px;
+  block-size: 16px;
+  margin-inline-end: 8px;
+  border: 1px solid var(--multiselect-checkbox-border, #757575);
+  border-radius: 3px;
+  background: var(--multiselect-surface, #fff);
+  vertical-align: -3px;
+}
+
+:where(.multiselect-checkbox--checked) {
+  position: relative;
+  border-color: var(--multiselect-primary, #2684ff);
+  background: var(--multiselect-primary, #2684ff);
+}
+
+/* The tick is the bottom and right borders of a rotated box, centered in the
+   square; its visual weight sits low, so it is nudged up slightly. */
+:where(.multiselect-checkbox--checked)::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 45%;
+  inset-inline-start: 50%;
+  box-sizing: border-box;
+  inline-size: 5px;
+  block-size: 9px;
+  border: solid var(--multiselect-on-primary, #fff);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+:where(.multiselect-checkbox--disabled) {
+  border-color: var(--multiselect-border, #e6e6e6);
+  background: var(--multiselect-disabled-surface, #f2f2f2);
+}
+
 @media (forced-colors: active) {
   :where(.multiselect-footer button:focus-visible) {
     outline-color: Highlight;
+  }
+
+  :where(.multiselect-checkbox) {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  :where(.multiselect-checkbox--checked) {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  :where(.multiselect-checkbox--checked)::after {
+    border-color: HighlightText;
+  }
+
+  :where(.multiselect-checkbox--disabled) {
+    border-color: GrayText;
   }
 }

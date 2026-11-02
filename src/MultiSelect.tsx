@@ -1,13 +1,18 @@
 import { useRef, useState } from 'react';
 import Select, {
   type ActionMeta,
+  mergeStyles,
   type MultiValue,
   type SelectInstance,
   type StylesConfig,
   type ThemeConfig,
 } from 'react-select';
 
-import { MenuFooterProvider, MenuSelect } from './MenuSelection';
+import {
+  MenuFooterProvider,
+  MenuSelect,
+  OptionWithCheckbox,
+} from './MenuSelection';
 
 import './MultiSelect.css';
 
@@ -30,6 +35,19 @@ export type MultiSelectProps = {
   className?: string;
   classNamePrefix?: string;
   menuPortalTarget?: HTMLElement | null;
+};
+
+// The checkbox shows the selection, so selected options drop react-select's
+// solid primary background and keep only the focus highlight.
+const defaultStyles: StylesConfig<MultiSelectOption, true> = {
+  option: (base, { isDisabled, isFocused, theme }) => ({
+    ...base,
+    backgroundColor: isFocused ? theme.colors.primary25 : 'transparent',
+    color: isDisabled ? theme.colors.neutral20 : 'inherit',
+    ':active': {
+      backgroundColor: isDisabled ? undefined : theme.colors.primary50,
+    },
+  }),
 };
 
 export function MultiSelect({
@@ -146,7 +164,7 @@ export function MultiSelect({
         isDisabled={disabled}
         isSearchable={isSearchable}
         theme={theme}
-        styles={styles}
+        styles={mergeStyles(defaultStyles, styles)}
         className={className}
         classNamePrefix={classNamePrefix}
         menuPortalTarget={menuPortalTarget}
@@ -156,7 +174,7 @@ export function MultiSelect({
         onMenuOpen={handleMenuOpen}
         onMenuClose={handleMenuClose}
         isOptionSelected={isInDraft}
-        components={{ Menu: MenuSelect }}
+        components={{ Menu: MenuSelect, Option: OptionWithCheckbox }}
       />
     </MenuFooterProvider>
   );

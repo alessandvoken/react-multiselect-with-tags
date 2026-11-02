@@ -1,5 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { components, type MenuProps } from 'react-select';
+import { components, type MenuProps, type OptionProps } from 'react-select';
 
 import type { MultiSelectOption } from './MultiSelect';
 
@@ -59,5 +59,27 @@ export function MenuSelect({
         </button>
       </fieldset>
     </components.Menu>
+  );
+}
+
+// Visual-only checkbox: a real <input> inside role="option" would be a nested
+// interactive control. Selection is exposed by the option itself.
+export function OptionWithCheckbox({
+  children,
+  ...rest
+}: OptionProps<MultiSelectOption, true>) {
+  const checkboxClassName = [
+    'multiselect-checkbox',
+    rest.isSelected && 'multiselect-checkbox--checked',
+    rest.isDisabled && 'multiselect-checkbox--disabled',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <components.Option {...rest}>
+      <span className={checkboxClassName} aria-hidden="true" />
+      {children}
+    </components.Option>
   );
 }
