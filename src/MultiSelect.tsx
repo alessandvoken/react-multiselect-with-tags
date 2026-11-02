@@ -1,4 +1,10 @@
-import Select, { type StylesConfig, type ThemeConfig } from 'react-select';
+import { useState } from 'react';
+import Select, {
+  type ActionMeta,
+  type MultiValue,
+  type StylesConfig,
+  type ThemeConfig,
+} from 'react-select';
 
 export type MultiSelectOption = { value: string; label: string };
 
@@ -36,9 +42,64 @@ export function MultiSelect({
   classNamePrefix,
   menuPortalTarget,
 }: MultiSelectProps) {
-  const selectedOptions = options.filter((option) =>
-    values.includes(option.value),
-  );
+  const [openMenu, setOpenMenu] = useState(false);
+
+  const [draft, setDraft] = useState<string[]>([]);
+
+  // Copies, not the original objects: react-select treats any option found in
+  // `value` by reference as selected and never asks isOptionSelected.
+  const selectedOptions = options
+    .filter((option) => values.includes(option.value))
+    .map((option) => ({ ...option }));
+
+  function isInDraft(option: MultiSelectOption): boolean {
+    return draft.includes(option.value);
+  }
+
+  function handleMenuOpen() {
+    setOpenMenu(true);
+    setDraft([...values]);
+  }
+
+  function handleMenuClose() {
+    setOpenMenu(false);
+  }
+
+  function handleChange(
+    newValue: MultiValue<MultiSelectOption>,
+    actionMeta: ActionMeta<MultiSelectOption>,
+  ) {
+    switch (actionMeta.action) {
+      case 'select-option': {
+        const { option } = actionMeta;
+        if (!option) return;
+        setDraft((prevDraft) => [...prevDraft, option.value]);
+        break;
+      }
+      case 'deselect-option': {
+        const { option } = actionMeta;
+        if (!option) return;
+        setDraft((prevDraft) =>
+          prevDraft.filter((value) => value !== option.value),
+        );
+        break;
+      }
+      case 'remove-value':
+      case 'pop-value': {
+        const { removedValue } = actionMeta;
+        onChange(newValue.map((option) => option.value));
+        setDraft((prevDraft) =>
+          prevDraft.filter((value) => value !== removedValue.value),
+        );
+        break;
+      }
+      case 'clear': {
+        onChange([]);
+        setDraft([]);
+        break;
+      }
+    }
+  }
 
   return (
     <Select
@@ -47,7 +108,7 @@ export function MultiSelect({
       aria-labelledby={ariaLabelledBy}
       options={options}
       value={selectedOptions}
-      onChange={(selected) => onChange(selected.map((option) => option.value))}
+      onChange={handleChange}
       placeholder={placeholder}
       isDisabled={disabled}
       isSearchable={isSearchable}
@@ -58,6 +119,10 @@ export function MultiSelect({
       menuPortalTarget={menuPortalTarget}
       closeMenuOnSelect={false}
       hideSelectedOptions={false}
+      menuIsOpen={openMenu}
+      onMenuOpen={handleMenuOpen}
+      onMenuClose={handleMenuClose}
+      isOptionSelected={isInDraft}
     />
   );
 }
