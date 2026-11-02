@@ -89,6 +89,75 @@
   background: var(--multiselect-disabled-surface, #f2f2f2);
 }
 
+:where(.multiselect-more) {
+  flex-shrink: 0;
+  margin: 2px;
+  padding: 3px 6px;
+  border-radius: 2px;
+  background: var(--multiselect-tag-surface, #e6e6e6);
+  color: var(--multiselect-text, #333);
+  font-size: 85%;
+  white-space: nowrap;
+}
+
+/* Hover list of the tags hidden behind +N. Author styles override the UA
+   [popover] defaults (centered, bordered) regardless of specificity. */
+:where(.multiselect-tooltip) {
+  position: fixed;
+  inset: auto;
+  z-index: 1;
+  max-inline-size: min(20rem, calc(100vw - 16px));
+  max-block-size: min(16rem, calc(100vh - 16px));
+  margin: 0;
+  padding: 6px 10px;
+  overflow: auto;
+  border: 1px solid var(--multiselect-tooltip-border, transparent);
+  border-radius: 4px;
+  background: var(--multiselect-tooltip-surface, #333);
+  box-shadow: 0 4px 11px hsl(0deg 0% 0% / 20%);
+  color: var(--multiselect-tooltip-text, #fff);
+  font-size: 85%;
+  line-height: 1.5;
+}
+
+:where(.multiselect-tooltip ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.multiselect-tooltip li) {
+  overflow-wrap: anywhere;
+}
+
+/* Off-screen copy of every tag, used only to measure how many fit. */
+:where(.multiselect-measure) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  display: flex;
+  padding: inherit;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+:where(.multiselect-measure > *) {
+  flex-shrink: 0;
+}
+
+:where(.multiselect-visually-hidden) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (forced-colors: active) {
   :where(.multiselect-footer button:focus-visible) {
     outline-color: Highlight;
@@ -111,5 +180,9 @@
 
   :where(.multiselect-checkbox--disabled) {
     border-color: GrayText;
+  }
+
+  :where(.multiselect-tooltip) {
+    border-color: CanvasText;
   }
 }

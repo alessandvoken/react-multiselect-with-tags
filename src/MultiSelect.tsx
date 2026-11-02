@@ -9,9 +9,12 @@ import Select, {
 } from 'react-select';
 
 import {
-  MenuFooterProvider,
+  INPUT_MIN_WIDTH,
+  InputWithSelectedValues,
   MenuSelect,
+  MultiSelectProvider,
   OptionWithCheckbox,
+  TagsValueContainer,
 } from './MenuSelection';
 
 import './MultiSelect.css';
@@ -37,9 +40,11 @@ export type MultiSelectProps = {
   menuPortalTarget?: HTMLElement | null;
 };
 
-// The checkbox shows the selection, so selected options drop react-select's
-// solid primary background and keep only the focus highlight.
 const defaultStyles: StylesConfig<MultiSelectOption, true> = {
+  valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
+  input: (base) => ({ ...base, minWidth: INPUT_MIN_WIDTH }),
+
+  multiValue: (base) => ({ ...base, minWidth: '4.5em' }),
   option: (base, { isDisabled, isFocused, theme }) => ({
     ...base,
     backgroundColor: isFocused ? theme.colors.primary25 : 'transparent',
@@ -57,6 +62,7 @@ export function MultiSelect({
   onChange,
   ariaLabelledBy,
   placeholder = 'Select options',
+  maxVisibleTags,
   disabled = false,
   isSearchable = true,
   resetLabel = 'Reset',
@@ -143,13 +149,14 @@ export function MultiSelect({
   }
 
   return (
-    <MenuFooterProvider
+    <MultiSelectProvider
       value={{
         resetLabel,
         confirmLabel,
-        isDisabled: draft.length === 0 && values.length === 0,
+        isFooterDisabled: draft.length === 0 && values.length === 0,
         onReset: handleReset,
         onConfirm: handleConfirm,
+        maxVisibleTags,
       }}
     >
       <Select
@@ -174,8 +181,13 @@ export function MultiSelect({
         onMenuOpen={handleMenuOpen}
         onMenuClose={handleMenuClose}
         isOptionSelected={isInDraft}
-        components={{ Menu: MenuSelect, Option: OptionWithCheckbox }}
+        components={{
+          Input: InputWithSelectedValues,
+          Menu: MenuSelect,
+          Option: OptionWithCheckbox,
+          ValueContainer: TagsValueContainer,
+        }}
       />
-    </MenuFooterProvider>
+    </MultiSelectProvider>
   );
 }
