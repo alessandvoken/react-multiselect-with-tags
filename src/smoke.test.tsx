@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
-import { page } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
+import { page } from 'vitest/browser';
 
 test('renders in a real browser', async () => {
   await render(<h1>Hello</h1>);
