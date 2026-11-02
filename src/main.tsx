@@ -6,11 +6,18 @@ import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import './demo.css';
 
 const teams: MultiSelectOption[] = [
+  { value: 'customer-success', label: 'Customer Success' },
   { value: 'design', label: 'Design' },
   { value: 'engineering', label: 'Engineering' },
   { value: 'finance', label: 'Finance' },
+  { value: 'legal', label: 'Legal' },
   { value: 'marketing', label: 'Marketing' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'people', label: 'People' },
+  { value: 'product', label: 'Product' },
+  { value: 'research-and-development', label: 'Research and Development' },
   { value: 'sales', label: 'Sales' },
+  { value: 'sales-operations', label: 'Sales Operations' },
 ];
 
 function Demo() {
