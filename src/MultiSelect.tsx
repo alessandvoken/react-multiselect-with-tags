@@ -1,6 +1,8 @@
 import { useRef, useState, type FocusEvent, type KeyboardEvent } from 'react';
 import Select, {
   type ActionMeta,
+  type AriaLiveMessages,
+  type GroupBase,
   mergeStyles,
   type MultiValue,
   type SelectInstance,
@@ -103,6 +105,14 @@ export function MultiSelect({
 
   const footerRef = useRef<HTMLFieldSetElement>(null);
 
+  // Polite status for what react-select does not announce: apply, reset and
+  // discarded changes. A trailing no-break space alternates so that the same
+  // message twice in a row is still announced.
+  const [status, setStatus] = useState('');
+  function announce(message: string) {
+    setStatus((prev) => (prev === message ? `${message}\u00a0` : message));
+  }
+
   // Set when the input loses focus to the footer, so the menu stays open.
   const isMovingToFooterRef = useRef(false);
 
@@ -121,12 +131,28 @@ export function MultiSelect({
     setDraft([...values]);
   }
 
+  const isDraftChanged =
+    draft.length !== values.length ||
+    draft.some((value) => !values.includes(value));
+
+  function labelsOf(selectedValues: readonly string[]) {
+    return options
+      .filter((option) => selectedValues.includes(option.value))
+      .map((option) => option.label);
+  }
+
+  // Every way of closing except OK: Escape, click outside, Tab away.
+  function closeWithoutApplying() {
+    if (openMenu && isDraftChanged) announce('Changes discarded.');
+    setOpenMenu(false);
+  }
+
   function handleMenuClose() {
     if (isMovingToFooterRef.current) {
       isMovingToFooterRef.current = false;
       return;
     }
-    setOpenMenu(false);
+    closeWithoutApplying();
   }
 
   function focusInput() {
@@ -135,7 +161,7 @@ export function MultiSelect({
 
   function dismissMenu() {
     focusInput();
-    setOpenMenu(false);
+    closeWithoutApplying();
   }
 
   // With an inline menu the browser already tabs from OK to the next element.
@@ -170,17 +196,81 @@ export function MultiSelect({
   function handleReset() {
     setDraft([]);
     if (values.length > 0) onChange([]);
+    announce('Selection cleared.');
     focusInput();
   }
 
   function handleConfirm() {
-    const hasChanged =
-      draft.length !== values.length ||
-      draft.some((value) => !values.includes(value));
-    if (hasChanged) onChange([...draft]);
+    if (isDraftChanged) onChange([...draft]);
+    const labels = labelsOf(draft);
+    announce(
+      labels.length > 0
+        ? `Selection applied: ${labels.join(', ')}.`
+        : 'Selection applied: none.',
+    );
     setOpenMenu(false);
-    selectRef.current?.focus();
+    focusInput();
   }
+
+  // react-select's default messages describe the confirmed value. Here the
+  // menu edits a draft, so messages say what is provisional and name the
+  // footer actions with their actual labels.
+  const ariaLiveMessages: AriaLiveMessages<
+    MultiSelectOption,
+    true,
+    GroupBase<MultiSelectOption>
+  > = {
+    guidance: ({ context, isSearchable: searchable }) => {
+      switch (context) {
+        case 'menu':
+          return `Use Up and Down to choose options, press Enter to add or remove the focused option, press Tab to reach ${resetLabel} and ${confirmLabel}, press ${confirmLabel} to confirm, press Escape to close without applying.`;
+        case 'input':
+          return `${searchable ? 'Type to refine list, ' : ''}press Down to open the menu, press Left to focus selected values.`;
+        case 'value':
+          return 'Use Left and Right to move between selected values, press Backspace to remove the focused value.';
+        default:
+          return '';
+      }
+    },
+    onChange: ({ action, label, labels }) => {
+      switch (action) {
+        case 'select-option':
+          return `option ${label} added, press ${confirmLabel} to confirm.`;
+        case 'deselect-option':
+          return `option ${label} removed, press ${confirmLabel} to confirm.`;
+        case 'remove-value':
+        case 'pop-value':
+          return `option ${label} removed from the applied selection.`;
+        case 'clear':
+          return 'All selected options have been cleared.';
+        case 'initial-input-focus':
+          return `option${labels.length > 1 ? 's' : ''} ${labels.join(', ')}, selected.`;
+        default:
+          return '';
+      }
+    },
+    onFocus: ({
+      context,
+      focused,
+      label,
+      options: focusable,
+      isDisabled,
+      isAppleDevice,
+    }) => {
+      const position = `${focusable.indexOf(focused) + 1} of ${focusable.length}`;
+      if (context === 'value') return `value ${label} focused, ${position}.`;
+      // Elsewhere aria-activedescendant points at the option, whose
+      // aria-selected already follows the draft.
+      if (!isAppleDevice) return '';
+      const state = [
+        draft.includes(focused.value) && 'selected',
+        isDisabled && 'disabled',
+      ]
+        .filter(Boolean)
+        .join(' ');
+      return `${label}${state ? ` ${state}` : ''}, ${position}.`;
+    },
+  };
 
   function handleChange(
     newValue: MultiValue<MultiSelectOption>,
@@ -231,7 +321,7 @@ export function MultiSelect({
         inputRef: () => selectRef.current?.inputRef ?? null,
         onFocusInput: focusInput,
         onDismiss: dismissMenu,
-        onCloseMenu: () => setOpenMenu(false),
+        onCloseMenu: closeWithoutApplying,
         onTabOut: tabOutOfFooter,
       }}
     >
@@ -259,6 +349,7 @@ export function MultiSelect({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         tabSelectsValue={false}
+        ariaLiveMessages={ariaLiveMessages}
         isOptionSelected={isInDraft}
         components={{
           Input: InputWithSelectedValues,
@@ -267,6 +358,11 @@ export function MultiSelect({
           ValueContainer: TagsValueContainer,
         }}
       />
+      {/* <output> has the implicit status role; aria-live is explicit for
+          screen readers that do not map it. */}
+      <output className="multiselect-visually-hidden" aria-live="polite">
+        {status}
+      </output>
     </MultiSelectProvider>
   );
 }

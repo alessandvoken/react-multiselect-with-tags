@@ -40,6 +40,19 @@ function Demo() {
       </header>
       <section className="demo-card" aria-labelledby="filter-title">
         <h2 id="filter-title">Filter</h2>
+        {/* Above the field, so the open menu never covers it. */}
+        <dl className="demo-summary">
+          <div>
+            <dt>Applied</dt>
+            <dd>
+              {appliedLabels.length > 0 ? appliedLabels.join(', ') : 'None'}
+            </dd>
+          </div>
+          <div>
+            <dt>Updates</dt>
+            <dd>{valuesCounter}</dd>
+          </div>
+        </dl>
         <label className="demo-label" htmlFor="teams">
           Teams
         </label>
@@ -53,15 +66,6 @@ function Demo() {
             setValuesCounter((prev) => prev + 1);
           }}
         />
-      </section>
-
-      <section className="demo-result" aria-labelledby="applied-filter-title">
-        <h2 id="applied-filter-title">Applied filter</h2>
-        <p>
-          Applied:{' '}
-          {appliedLabels.length > 0 ? appliedLabels.join(', ') : 'None'}
-        </p>
-        <p>onChange calls: {valuesCounter}</p>
       </section>
     </main>
   );
