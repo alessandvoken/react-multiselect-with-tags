@@ -5,8 +5,11 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type FocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import {
   components,
@@ -28,6 +31,12 @@ export type MultiSelectContextValue = {
   onReset: () => void;
   onConfirm: () => void;
   maxVisibleTags?: number;
+  footerRef: RefObject<HTMLFieldSetElement | null>;
+  inputRef: () => HTMLInputElement | null;
+  onFocusInput: () => void;
+  onDismiss: () => void;
+  onCloseMenu: () => void;
+  onTabOut: () => boolean;
 };
 
 // react-select does not forward extra props to custom components, so they read
@@ -73,14 +82,67 @@ export function MenuSelect({
   children,
   ...rest
 }: MenuProps<MultiSelectOption, true>) {
-  const { resetLabel, confirmLabel, isFooterDisabled, onReset, onConfirm } =
-    useMultiSelectContext();
+  const {
+    resetLabel,
+    confirmLabel,
+    isFooterDisabled,
+    onReset,
+    onConfirm,
+    footerRef,
+    inputRef,
+    onFocusInput,
+    onDismiss,
+    onCloseMenu,
+    onTabOut,
+  } = useMultiSelectContext();
+
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    // react-select listens for keys on its container: without this, Enter or
+    // Space on a button would also toggle the focused option.
+    event.stopPropagation();
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onDismiss();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    // Explicit, so it also works when the menu is portalled elsewhere in the
+    // DOM: Shift+Tab from the first button returns to the input, Tab from the
+    // last one continues after the component.
+    const buttons = [
+      ...(footerRef.current?.querySelectorAll('button:enabled') ?? []),
+    ];
+    if (event.shiftKey && event.currentTarget === buttons[0]) {
+      event.preventDefault();
+      onFocusInput();
+    } else if (!event.shiftKey && event.currentTarget === buttons.at(-1)) {
+      if (onTabOut()) event.preventDefault();
+    }
+  }
+
+  function handleBlur(event: FocusEvent<HTMLButtonElement>) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && footerRef.current?.contains(next)) return;
+    if (next === inputRef()) return;
+    // Focus left the component from the footer: close and discard the draft.
+    onCloseMenu();
+  }
 
   return (
     <components.Menu {...rest}>
       {children}
-      <fieldset className="multiselect-footer" aria-label="Selection actions">
-        <button type="button" disabled={isFooterDisabled} onClick={onReset}>
+      <fieldset
+        ref={footerRef}
+        className="multiselect-footer"
+        aria-label="Selection actions"
+      >
+        <button
+          type="button"
+          disabled={isFooterDisabled}
+          onClick={onReset}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+        >
           {resetLabel}
         </button>
         <button
@@ -88,6 +150,8 @@ export function MenuSelect({
           className="multiselect-confirm"
           disabled={isFooterDisabled}
           onClick={onConfirm}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
         >
           {confirmLabel}
         </button>
@@ -175,14 +239,7 @@ export function TagsValueContainer({
     return () => observer.disconnect();
   }, [valuesKey]);
 
-  if (tags.length === 0) {
-    return (
-      <components.ValueContainer {...rest}>
-        {children}
-      </components.ValueContainer>
-    );
-  }
-
+  const hasTags = tags.length > 0;
   const visibleCount = Math.max(
     1,
     Math.min(fitCount, maxVisibleTags ?? Number.POSITIVE_INFINITY),
@@ -192,18 +249,28 @@ export function TagsValueContainer({
     .map((option) => option.label);
   const hiddenCount = hiddenLabels.length;
 
+  // Same child positions with and without tags, so the input keeps its DOM
+  // node (and focus) when the last tag is removed or the first one added.
   return (
     <components.ValueContainer {...rest}>
-      {tags.slice(0, visibleCount)}
+      {hasTags ? tags.slice(0, visibleCount) : valueNodes}
       {hiddenCount > 0 && <HiddenTagsCounter labels={hiddenLabels} />}
       {input}
-      <span id={selectedValuesId(rest.selectProps.inputId)} hidden>
-        Selected: {selected.map((option) => option.label).join(', ')}.
-      </span>
-      <div ref={measureRef} className="multiselect-measure" aria-hidden="true">
-        {tags}
-        <span className="multiselect-more">+{tags.length}</span>
-      </div>
+      {hasTags && (
+        <span id={selectedValuesId(rest.selectProps.inputId)} hidden>
+          Selected: {selected.map((option) => option.label).join(', ')}.
+        </span>
+      )}
+      {hasTags && (
+        <div
+          ref={measureRef}
+          className="multiselect-measure"
+          aria-hidden="true"
+        >
+          {tags}
+          <span className="multiselect-more">+{tags.length}</span>
+        </div>
+      )}
     </components.ValueContainer>
   );
 }
