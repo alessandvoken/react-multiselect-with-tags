@@ -8,6 +8,8 @@ Pick several options, then press **OK** to apply them in one go. Close the menu 
 
 > **Work in progress.** No live preview or package yet.
 
+![Menu open with three teams ticked in the draft, Reset and OK below; the applied filter is still None](public/screenshots/02-draft-before-ok.png)
+
 ## Why
 
 A filter that refetches on every checkbox sends one request per click. Here the menu edits a draft, and the parent's `onChange` runs once, when the user presses OK.
@@ -29,12 +31,16 @@ Reset and OK are disabled when both the draft and the applied values are empty. 
 
 Applied values appear as tags on a single row. As many as fit are shown and the rest are counted in `+N`, re-measured when the width, zoom or font changes. Hover `+N` to list the hidden values. `maxVisibleTags` sets an upper limit.
 
+![Three applied tags and a +3 counter, with the hidden teams listed in a tooltip](public/screenshots/03-applied-tags-overflow.png)
+
 ## Keyboard
 
 - Arrow keys move through the options; Enter toggles the highlighted one.
 - Tab from the input moves to Reset, then OK; Tab from OK leaves the component. Shift+Tab from Reset returns to the input.
 - Escape closes without applying, from the input or the footer.
 - Enter or Space on a footer button never toggles an option as well.
+
+More states: [empty](public/screenshots/01-empty.png), [search](public/screenshots/04-search.png), [keyboard focus on Reset](public/screenshots/05-keyboard-footer-focus.png), [disabled](public/screenshots/06-disabled.png), [mobile](public/screenshots/07-mobile-draft.png). Regenerate them with `pnpm screenshots`.
 
 ## Accessibility
 

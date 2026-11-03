@@ -7,7 +7,7 @@
 
 body {
   margin: 0;
-  background: #f6f7f9;
+  background: #f4f5f7;
   color: #1f2933;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
@@ -40,20 +40,41 @@ p {
   padding: 3rem 1rem;
 }
 
-.demo > header {
+.demo-header {
   display: grid;
   gap: 0.5rem;
 }
 
-.demo > header p {
+.demo-header p {
+  max-width: 34rem;
   color: #4a5562;
+}
+
+.demo-header .demo-eyebrow {
+  color: #4a5562;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+a {
+  color: #0052cc;
+  text-underline-offset: 0.15em;
+}
+
+a:focus-visible,
+.demo-toggle input:focus-visible {
+  outline: 2px solid #0052cc;
+  outline-offset: 2px;
 }
 
 .demo-card {
   padding: 1.5rem;
   border: 1px solid #d9dde3;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: #fff;
+  box-shadow: 0 1px 2px hsl(220deg 20% 20% / 6%);
 }
 
 /* Applied values and the onChange count: what the parent has received. */
@@ -96,6 +117,27 @@ p {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
+}
+
+.demo-help {
+  margin-top: 0.5rem;
+  color: #4a5562;
+  font-size: 0.875rem;
+}
+
+.demo-toggle {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+}
+
+.demo-header .demo-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 30rem) {

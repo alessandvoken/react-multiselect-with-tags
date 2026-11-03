@@ -25,6 +25,8 @@ function Demo() {
 
   const [valuesCounter, setValuesCounter] = useState(0);
 
+  const [isDisabled, setIsDisabled] = useState(false);
+
   // Portal host inside <main>, so the menu stays in the page landmark.
   const [menuHost, setMenuHost] = useState<HTMLDivElement | null>(null);
 
@@ -34,11 +36,21 @@ function Demo() {
 
   return (
     <main className="demo">
-      <header>
+      <header className="demo-header">
+        <p className="demo-eyebrow">Component preview</p>
         <h1>React multiselect with tags</h1>
         <p>
-          Select several teams, then press OK to apply the filter once. Closing
-          the menu without OK discards the draft.
+          Tick several teams, then press OK to apply the filter once. Close the
+          menu without OK and the draft is discarded.
+        </p>
+        <p className="demo-links">
+          <a href="https://github.com/alessandvoken/react-multiselect-with-tags">
+            Source on GitHub
+          </a>
+          <span aria-hidden="true">·</span>
+          <span>
+            Built on <a href="https://react-select.com/">react-select</a>
+          </span>
         </p>
       </header>
       <section className="demo-card" aria-labelledby="filter-title">
@@ -64,12 +76,26 @@ function Demo() {
           menuPortalTarget={menuHost}
           options={teams}
           placeholder="Select teams"
+          ariaDescribedBy="teams-help"
+          disabled={isDisabled}
           values={values}
           onChange={(nextValues) => {
             setValues(nextValues);
             setValuesCounter((prev) => prev + 1);
           }}
         />
+        <p id="teams-help" className="demo-help">
+          Updates counts each call to onChange: it changes on OK, Reset or tag
+          removal, never while ticking options.
+        </p>
+        <label className="demo-toggle">
+          <input
+            type="checkbox"
+            checked={isDisabled}
+            onChange={(event) => setIsDisabled(event.target.checked)}
+          />
+          Disabled
+        </label>
       </section>
       <div ref={setMenuHost} />
     </main>
