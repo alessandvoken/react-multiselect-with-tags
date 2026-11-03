@@ -1,5 +1,7 @@
 # React multiselect with tags, checkboxes and an OK button
 
+[![Check](https://github.com/alessandvoken/react-multiselect-with-tags/actions/workflows/check.yml/badge.svg)](https://github.com/alessandvoken/react-multiselect-with-tags/actions/workflows/check.yml)
+
 A searchable React multi-select with checkbox options, removable tags on one row and a Reset / OK footer. Built on [react-select](https://react-select.com/).
 
 Pick several options, then press **OK** to apply them in one go. Close the menu instead and the draft is discarded.
@@ -41,7 +43,7 @@ Applied values appear as tags on a single row. As many as fit are shown and the 
 - All applied values, including those behind `+N`, are part of the input's accessible description.
 - Focus stays visible in forced-colors mode; the placeholder has 5.7:1 contrast.
 
-Checked so far in headless Chromium with keyboard and DOM assertions. Not done yet: tests in the repository, automated axe runs, VoiceOver and NVDA sessions, 200–400% zoom.
+Covered by tests in headless Chromium: keyboard paths, draft and commit, tags at several widths, announcements and axe scans of the main states. Not done yet: VoiceOver and NVDA sessions, 200–400% zoom.
 
 Deliberate trade-off: OK keeps react-select's default blue (`#2684FF`), so its white text is about 3.6:1, below the 4.5:1 required for normal text. If you need WCAG AA, set `--multiselect-primary` to a darker blue, such as `#0052CC`.
 
@@ -135,6 +137,8 @@ pnpm install
 pnpm dev        # demo page
 pnpm lint
 pnpm typecheck
+pnpm test       # component tests in headless Chromium
+pnpm test:e2e   # builds the demo and runs Playwright
 pnpm build
 ```
 
