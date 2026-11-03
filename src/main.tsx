@@ -1,6 +1,7 @@
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { GitHubIcon } from './GitHubIcon';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 
 import './demo.css';
@@ -44,7 +45,11 @@ function Demo() {
           menu without OK and the draft is discarded.
         </p>
         <p className="demo-links">
-          <a href="https://github.com/alessandvoken/react-multiselect-with-tags">
+          <a
+            className="demo-github"
+            href="https://github.com/alessandvoken/react-multiselect-with-tags"
+          >
+            <GitHubIcon />
             Source on GitHub
           </a>
           <span aria-hidden="true">·</span>
