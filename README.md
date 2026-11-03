@@ -47,22 +47,50 @@ Deliberate trade-off: OK keeps react-select's default blue (`#2684FF`), so its w
 
 ## Usage
 
-Install react-select, then copy `src/MultiSelect.tsx`, `src/MenuSelection.tsx` and `src/MultiSelect.css` into your project.
+1. **Install react-select.**
 
-```tsx
-const [teams, setTeams] = useState<string[]>([]);
+   ```sh
+   npm install react-select
+   ```
 
-<label htmlFor="teams">Teams</label>
-<MultiSelect
-  inputId="teams"
-  options={[
-    { value: 'design', label: 'Design' },
-    { value: 'engineering', label: 'Engineering' },
-  ]}
-  values={teams}
-  onChange={setTeams}
-/>
-```
+2. **Copy the component.** Copy the `src/MultiSelect/` folder into your project, for example to `src/components/MultiSelect/`.
+
+3. **Check the CSS import.** `MultiSelect.tsx` imports `./MultiSelect.css`. Vite, Next.js (App Router) and webpack with a CSS loader handle this as is. If your setup can't import CSS from a component, delete that line and load the file with your global styles.
+
+   With the Next.js App Router, also add `'use client';` at the top of `MultiSelect.tsx`.
+
+4. **Render it with a label.** The parent keeps the applied values in state:
+
+   ```tsx
+   import { useState } from 'react';
+
+   import { MultiSelect } from './components/MultiSelect';
+
+   const teams = [
+     { value: 'design', label: 'Design' },
+     { value: 'engineering', label: 'Engineering' },
+   ];
+
+   export function TeamFilter() {
+     const [selected, setSelected] = useState<string[]>([]);
+
+     return (
+       <>
+         <label htmlFor="teams">Teams</label>
+         <MultiSelect
+           inputId="teams"
+           options={teams}
+           values={selected}
+           onChange={setSelected}
+         />
+       </>
+     );
+   }
+   ```
+
+5. **React to changes in `onChange`.** It runs once per OK, Reset, clear (×) or tag removal, never while ticking options, so it's the place to refetch or filter.
+
+6. **Optional.** Rename the buttons with `resetLabel` / `confirmLabel`, link help text with `ariaDescribedBy`, and match your colours with `theme`, `styles` and the CSS variables below.
 
 Written against React 19 and react-select 5.10 without React 19-only APIs. React 18 has not been tested yet.
 
