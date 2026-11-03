@@ -25,6 +25,9 @@ function Demo() {
 
   const [valuesCounter, setValuesCounter] = useState(0);
 
+  // Portal host inside <main>, so the menu stays in the page landmark.
+  const [menuHost, setMenuHost] = useState<HTMLDivElement | null>(null);
+
   const appliedLabels = teams
     .filter((team) => values.includes(team.value))
     .map((team) => team.label);
@@ -58,6 +61,7 @@ function Demo() {
         </label>
         <MultiSelect
           inputId="teams"
+          menuPortalTarget={menuHost}
           options={teams}
           placeholder="Select teams"
           values={values}
@@ -67,6 +71,7 @@ function Demo() {
           }}
         />
       </section>
+      <div ref={setMenuHost} />
     </main>
   );
 }
