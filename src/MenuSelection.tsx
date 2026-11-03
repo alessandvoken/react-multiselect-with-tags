@@ -31,6 +31,7 @@ export type MultiSelectContextValue = {
   onReset: () => void;
   onConfirm: () => void;
   maxVisibleTags?: number;
+  ariaDescribedBy?: string;
   footerRef: RefObject<HTMLFieldSetElement | null>;
   inputRef: () => HTMLInputElement | null;
   onFocusInput: () => void;
@@ -390,14 +391,24 @@ function HiddenTagsCounter({ labels }: { labels: string[] }) {
 export function InputWithSelectedValues(
   props: InputProps<MultiSelectOption, true>,
 ) {
+  const { ariaDescribedBy } = useMultiSelectContext();
+  // Consumer help or error text first, then react-select's own description,
+  // then the list of confirmed values.
   const describedBy = [
+    ariaDescribedBy,
     props['aria-describedby'],
     props.hasValue && selectedValuesId(props.selectProps.inputId),
   ]
     .filter(Boolean)
     .join(' ');
 
+  // react-select sets aria-haspopup="true", which means a menu; the popup here
+  // is a listbox.
   return (
-    <components.Input {...props} aria-describedby={describedBy || undefined} />
+    <components.Input
+      {...props}
+      aria-haspopup="listbox"
+      aria-describedby={describedBy || undefined}
+    />
   );
 }

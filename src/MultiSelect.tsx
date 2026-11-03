@@ -29,6 +29,7 @@ export type MultiSelectProps = {
   options: readonly MultiSelectOption[];
   onChange: (values: string[]) => void;
   ariaLabelledBy?: string;
+  ariaDescribedBy?: string;
   placeholder?: string;
   maxVisibleTags?: number;
   disabled?: boolean;
@@ -43,6 +44,20 @@ export type MultiSelectProps = {
 };
 
 const defaultStyles: StylesConfig<MultiSelectOption, true> = {
+  // react-select hides the outline and shows focus with a box-shadow, which
+  // forced-colors mode removes: draw a system-color outline there instead.
+  control: (base, { isFocused }) => ({
+    ...base,
+    outline: 0,
+    '@media (forced-colors: active)': isFocused
+      ? { outline: '2px solid Highlight', outlineOffset: 2 }
+      : {},
+  }),
+  // neutral60 (#666) reaches 5.7:1 on white; the default neutral50 is 3.9:1.
+  placeholder: (base, { theme }) => ({
+    ...base,
+    color: theme.colors.neutral60,
+  }),
   valueContainer: (base) => ({ ...base, flexWrap: 'nowrap' }),
   input: (base) => ({ ...base, minWidth: INPUT_MIN_WIDTH }),
 
@@ -85,6 +100,7 @@ export function MultiSelect({
   options,
   onChange,
   ariaLabelledBy,
+  ariaDescribedBy,
   placeholder = 'Select options',
   maxVisibleTags,
   disabled = false,
@@ -317,6 +333,7 @@ export function MultiSelect({
         onReset: handleReset,
         onConfirm: handleConfirm,
         maxVisibleTags,
+        ariaDescribedBy,
         footerRef,
         inputRef: () => selectRef.current?.inputRef ?? null,
         onFocusInput: focusInput,
