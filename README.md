@@ -6,7 +6,7 @@ A searchable React multi-select with checkbox options, removable tags on one row
 
 Pick several options, then press **OK** to apply them in one go. Close the menu instead and the draft is discarded.
 
-> **Work in progress.** No live preview or package yet.
+**[Live demo](https://react-multiselect-with-tags.vercel.app/)**
 
 ![Menu open with three teams ticked in the draft, Reset and OK below; the applied filter is still None](public/screenshots/02-draft-before-ok.png)
 
