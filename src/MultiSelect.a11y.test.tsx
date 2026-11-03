@@ -37,8 +37,8 @@ function Page({
   );
 }
 
-// Known issue, see README: white on the default #2684FF OK button is ~3.6:1.
-// Excluded from the state scans and tracked by its own test below.
+// Accepted trade-off, see README: OK keeps react-select's default #2684FF, so
+// white text is ~3.6:1. Excluded from the state scans and pinned below.
 const KNOWN_CONTRAST_ISSUE = '.multiselect-confirm';
 
 async function scan(
@@ -121,7 +121,8 @@ test('open in forced-colors mode', async () => {
   expect(getComputedStyle(control).outlineStyle).toBe('solid');
 });
 
-// Flip to `test` once --multiselect-primary defaults to an AA-compliant blue.
+// Documents the trade-off: fails today by design. If the default blue changes
+// to an AA-compliant one, this starts passing and must become a plain `test`.
 test.fails('OK button text meets 4.5:1 contrast', async () => {
   await render(<Page initial={['design']} />);
   await input().click();

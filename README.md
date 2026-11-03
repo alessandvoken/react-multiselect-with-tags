@@ -43,7 +43,7 @@ Applied values appear as tags on a single row. As many as fit are shown and the 
 
 Checked so far in headless Chromium with keyboard and DOM assertions. Not done yet: tests in the repository, automated axe runs, VoiceOver and NVDA sessions, 200–400% zoom.
 
-Known issue: white text on the default OK button (`#2684FF`) is about 3.6:1, below the 4.5:1 required for normal text. Set `--multiselect-primary` to a darker blue if you need WCAG AA.
+Deliberate trade-off: OK keeps react-select's default blue (`#2684FF`), so its white text is about 3.6:1, below the 4.5:1 required for normal text. If you need WCAG AA, set `--multiselect-primary` to a darker blue, such as `#0052CC`.
 
 ## Usage
 

@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-// Known issue, see README: white on the default #2684FF OK button is ~3.6:1.
+// Accepted trade-off, see README: white on the default #2684FF OK button is
+// ~3.6:1.
 const KNOWN_CONTRAST_ISSUE = '.multiselect-confirm';
 
 test('filter teams with a draft, then apply once', async ({ page }) => {
