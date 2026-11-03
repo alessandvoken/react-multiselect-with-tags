@@ -1,4 +1,4 @@
-import { createContext, useContext, type RefObject } from 'react';
+import { createContext, useContext } from 'react';
 
 export type MultiSelectContextValue = {
   resetLabel: string;
@@ -8,7 +8,9 @@ export type MultiSelectContextValue = {
   onConfirm: () => void;
   maxVisibleTags?: number;
   ariaDescribedBy?: string;
-  footerRef: RefObject<HTMLFieldSetElement | null>;
+  // Structural on purpose: @types/react 18 and 19 disagree on RefObject's
+  // nullability, and this shape is accepted as a `ref` by both.
+  footerRef: { readonly current: HTMLFieldSetElement | null };
   inputRef: () => HTMLInputElement | null;
   onFocusInput: () => void;
   onDismiss: () => void;

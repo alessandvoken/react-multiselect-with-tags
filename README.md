@@ -49,7 +49,7 @@ More states: [empty](public/screenshots/01-empty.png), [search](public/screensho
 - All applied values, including those behind `+N`, are part of the input's accessible description.
 - Focus stays visible in forced-colors mode; the placeholder has 5.7:1 contrast.
 
-Covered by tests in headless Chromium: keyboard paths, draft and commit, tags at several widths, announcements and axe scans of the main states. Not done yet: VoiceOver and NVDA sessions, 200–400% zoom.
+Covered by tests in headless Chromium: keyboard paths, draft and commit, tags at several widths, announcements and axe scans of the main states. Reflow checked at 200% and 400% zoom (640 and 320 CSS px): no horizontal scrolling, footer reachable. Screen reader output is generated to be accurate, but has not been recorded with VoiceOver or NVDA here.
 
 Deliberate trade-off: OK keeps react-select's default blue (`#2684FF`), so its white text is about 3.6:1, below the 4.5:1 required for normal text. If you need WCAG AA, set `--multiselect-primary` to a darker blue, such as `#0052CC`.
 
@@ -100,7 +100,7 @@ Deliberate trade-off: OK keeps react-select's default blue (`#2684FF`), so its w
 
 6. **Optional.** Rename the buttons with `resetLabel` / `confirmLabel`, link help text with `ariaDescribedBy`, and match your colours with `theme`, `styles` and the CSS variables below.
 
-Written against React 19 and react-select 5.10 without React 19-only APIs. React 18 has not been tested yet.
+Works with React 18 and 19 and react-select 5.10; CI runs the tests on both React versions.
 
 ## Props
 

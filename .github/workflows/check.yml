@@ -47,3 +47,20 @@ jobs:
             test-results
             .vitest
           retention-days: 7
+
+  # The component promises React 18 support: typecheck and unit tests on it.
+  react-18:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add react@18 react-dom@18 @types/react@18 @types/react-dom@18
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm typecheck
+      - run: pnpm test
