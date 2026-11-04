@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { GitHubIcon } from './GitHubIcon';
@@ -21,10 +21,66 @@ const teams: MultiSelectOption[] = [
   { value: 'sales-operations', label: 'Sales Operations' },
 ];
 
+type Person = { name: string; team: string };
+
+const people: Person[] = [
+  { name: 'Amara Okafor', team: 'customer-success' },
+  { name: 'Lena Fischer', team: 'design' },
+  { name: 'Tomás Herrera', team: 'design' },
+  { name: 'Priya Raman', team: 'engineering' },
+  { name: 'Marco Bianchi', team: 'engineering' },
+  { name: 'Yuki Tanaka', team: 'engineering' },
+  { name: 'Grace Mensah', team: 'finance' },
+  { name: 'Oliver Grant', team: 'legal' },
+  { name: 'Sofia Lindqvist', team: 'marketing' },
+  { name: 'Daniel Costa', team: 'marketing' },
+  { name: 'Hana Novak', team: 'operations' },
+  { name: 'Samuel Reyes', team: 'people' },
+  { name: 'Chloé Martin', team: 'product' },
+  { name: 'Arjun Mehta', team: 'product' },
+  { name: 'Ingrid Berg', team: 'research-and-development' },
+  { name: 'Kwame Asante', team: 'sales' },
+  { name: 'Elena Petrova', team: 'sales' },
+  { name: 'Noah Williams', team: 'sales-operations' },
+];
+
+const teamLabels = new Map(teams.map((team) => [team.value, team.label]));
+
+// Stands in for an API call: answers after a network-like delay. No teams
+// means no filter.
+function fetchPeople(
+  teamValues: string[],
+  signal: AbortSignal,
+): Promise<Person[]> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      resolve(
+        teamValues.length === 0
+          ? people
+          : people.filter((person) => teamValues.includes(person.team)),
+      );
+    }, 400);
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      },
+      { once: true },
+    );
+  });
+}
+
 function Demo() {
   const [values, setValues] = useState<string[]>([]);
 
-  const [valuesCounter, setValuesCounter] = useState(0);
+  const [requestCount, setRequestCount] = useState(0);
+
+  const [results, setResults] = useState(people);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const requestRef = useRef<AbortController | null>(null);
 
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -35,14 +91,36 @@ function Demo() {
     .filter((team) => values.includes(team.value))
     .map((team) => team.label);
 
+  // One request per applied change. A newer request cancels the older one,
+  // so a slow response never overwrites a newer filter.
+  function applyFilter(nextValues: string[]) {
+    setValues(nextValues);
+    setRequestCount((prev) => prev + 1);
+    setIsLoading(true);
+
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
+
+    fetchPeople(nextValues, controller.signal).then(
+      (nextResults) => {
+        setResults(nextResults);
+        setIsLoading(false);
+      },
+      () => {
+        // Aborted: the newer request takes over, loading stays on.
+      },
+    );
+  }
+
   return (
     <main className="demo">
       <header className="demo-header">
         <p className="demo-eyebrow">Component preview</p>
         <h1>React multiselect with tags</h1>
         <p>
-          Tick several teams, then press OK to apply the filter once. Close the
-          menu without OK and the draft is discarded.
+          Tick several teams, then press OK: the list is fetched once, not on
+          every tick. Close the menu without OK and the draft is discarded.
         </p>
         <p className="demo-links">
           <a
@@ -69,8 +147,8 @@ function Demo() {
             </dd>
           </div>
           <div>
-            <dt>Updates</dt>
-            <dd>{valuesCounter}</dd>
+            <dt>Requests</dt>
+            <dd>{requestCount}</dd>
           </div>
         </dl>
         <label className="demo-label" htmlFor="teams">
@@ -84,13 +162,10 @@ function Demo() {
           ariaDescribedBy="teams-help"
           disabled={isDisabled}
           values={values}
-          onChange={(nextValues) => {
-            setValues(nextValues);
-            setValuesCounter((prev) => prev + 1);
-          }}
+          onChange={applyFilter}
         />
         <p id="teams-help" className="demo-help">
-          Updates counts each call to onChange: it changes on OK, Reset or tag
+          Each call to onChange sends one mock request: on OK, Reset or tag
           removal, never while ticking options.
         </p>
         <label className="demo-toggle">
@@ -101,6 +176,30 @@ function Demo() {
           />
           Disabled
         </label>
+      </section>
+      <section
+        className="demo-card"
+        aria-labelledby="results-title"
+        aria-busy={isLoading}
+      >
+        <div className="demo-results-header">
+          <h2 id="results-title">People</h2>
+          <output className="demo-results-status">
+            {isLoading
+              ? 'Loading…'
+              : `${results.length} ${results.length === 1 ? 'person' : 'people'}`}
+          </output>
+        </div>
+        <ul className="demo-results" data-loading={isLoading || undefined}>
+          {results.map((person) => (
+            <li key={person.name}>
+              <span>{person.name}</span>
+              <span className="demo-results-team">
+                {teamLabels.get(person.team)}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
       <div ref={setMenuHost} />
     </main>

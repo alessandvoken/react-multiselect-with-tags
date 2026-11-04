@@ -10,13 +10,16 @@ test('filter teams with a draft, then apply once', async ({ page }) => {
 
   const teams = page.getByRole('combobox', { name: 'Teams' });
   const applied = page.locator('.demo-summary dd').first();
-  const updates = page.locator('.demo-summary dd').last();
+  const requests = page.locator('.demo-summary dd').last();
+  const people = page.getByRole('region', { name: 'People' });
+  const status = people.getByRole('status');
   const option = (name: string) => page.getByRole('option', { name });
   const button = (name: string) =>
     page.getByRole('button', { name, exact: true });
 
   await expect(applied).toHaveText('None');
-  await expect(updates).toHaveText('0');
+  await expect(requests).toHaveText('0');
+  await expect(status).toHaveText('18 people');
 
   // Draft: search, tick three options, nothing applied yet.
   await teams.click();
@@ -25,13 +28,13 @@ test('filter teams with a draft, then apply once', async ({ page }) => {
   await teams.fill('');
   await option('Design').click();
   await option('Finance').click();
-  await expect(updates).toHaveText('0');
+  await expect(requests).toHaveText('0');
   await expect(applied).toHaveText('None');
 
   // Closing without OK discards the draft.
   await page.keyboard.press('Escape');
   await expect(page.getByRole('listbox')).toBeHidden();
-  await expect(updates).toHaveText('0');
+  await expect(requests).toHaveText('0');
 
   // Apply with the keyboard: Tab to the footer, Enter on OK.
   await teams.press('ArrowDown');
@@ -43,19 +46,23 @@ test('filter teams with a draft, then apply once', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(teams).toBeFocused();
   await expect(applied).toHaveText('Customer Success, Engineering');
-  await expect(updates).toHaveText('1');
+  await expect(requests).toHaveText('1');
+  await expect(status).toHaveText('4 people');
+  await expect(people.getByRole('listitem')).toHaveCount(4);
 
   // Removing a tag applies at once.
   await page.getByRole('button', { name: 'Remove Customer Success' }).click();
   await expect(applied).toHaveText('Engineering');
-  await expect(updates).toHaveText('2');
+  await expect(requests).toHaveText('2');
+  await expect(status).toHaveText('3 people');
 
   // Reset clears immediately and keeps the menu open.
   await teams.click();
   await button('Reset').click();
   await expect(applied).toHaveText('None');
-  await expect(updates).toHaveText('3');
+  await expect(requests).toHaveText('3');
   await expect(page.getByRole('listbox')).toBeVisible();
+  await expect(status).toHaveText('18 people');
 
   const { violations } = await new AxeBuilder({ page })
     .exclude(KNOWN_CONTRAST_ISSUE)
